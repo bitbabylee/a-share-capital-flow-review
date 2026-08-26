@@ -24,9 +24,9 @@ $('foot').textContent = D.text.foot;
 
 /* as-of 标签 */
 $('asof1').textContent='as-of '+D.date;
-$('asof2').textContent='as-of '+D.date;
-$('asof4').textContent='as-of '+D.date;
-$('asof5').textContent='as-of '+D.date;
+$('asof2').textContent='涨跌停 as-of '+(D.breadth&&D.breadth.asof||D.date)+'；新高/新低 as-of '+(D.breadth&&D.breadth.new_high_asof||D.date);
+$('asof4').textContent='as-of '+(D.flow_asof||D.date);
+$('asof5').textContent='as-of '+(D.lhb_asof||D.date);
 $('asof8').textContent='展望 '+(D.outlook&&D.outlook.next_trade_date||'')+'（概率为主观情景判断，非预测）';
 /* 模块守卫：数据源降级/缺失时整节隐藏，不报错 */
 if (D.margin && D.margin.dates_full && D.margin.dates_full.length)
@@ -35,7 +35,12 @@ else $('s3').style.display='none';
 if (D.etf && D.etf.rows && D.etf.rows.length)
   $('asof6').textContent='成交 as-of '+D.date+'，份额 as-of '+(D.etf.rows[0].shr_asof||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1-$2-$3')+'（T+1）';
 else $('s6').style.display='none';
-if (D.macro && D.macro.dr007 && D.macro.dr007.v && D.macro.dr007.v.length) $('asof7').textContent='as-of '+D.date;
+if (D.macro && D.macro.dr007 && D.macro.dr007.v && D.macro.dr007.v.length) {
+  const drAsOf = D.macro.dr007.dates_full&&D.macro.dr007.dates_full.slice(-1)[0]||'';
+  const y10AsOf = D.macro.y10&&D.macro.y10.dates_full&&D.macro.y10.dates_full.slice(-1)[0]||'';
+  const omoAsOf = D.macro.omo&&D.macro.omo.dates_full&&D.macro.omo.dates_full.slice(-1)[0]||'';
+  $('asof7').textContent=`DR007 ${drAsOf}；10Y ${y10AsOf}；OMO ${omoAsOf}`;
+}
 else $('s7').style.display='none';
 if (!(D.flow && D.flow.l1_in && D.flow.l1_in.length)) $('s4').style.display='none';
 if (!(D.lhb && D.lhb.buy)) $('s5').style.display='none';
@@ -84,7 +89,7 @@ mk('c_nhnl', {
   yAxis: {type:'value',name:'家'},
   series: [
     {name:'创新高',type:'bar',data:B.new_high,itemStyle:{color:UP},barMaxWidth:10},
-    {name:'创新低',type:'bar',data:B.new_low.map(v=>-v),itemStyle:{color:DOWN},barMaxWidth:10}
+    {name:'创新低',type:'bar',data:B.new_low.map(v=>v==null?null:-v),itemStyle:{color:DOWN},barMaxWidth:10}
   ],
   dataZoom:[{type:'inside'},{type:'slider',height:16,bottom:8}]
 });
