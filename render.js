@@ -33,7 +33,9 @@ if (D.margin && D.margin.dates_full && D.margin.dates_full.length)
   $('asof3').textContent='as-of '+(D.margin.dates_full.slice(-1)[0]||'')+'（T+1）';
 else $('s3').style.display='none';
 if (D.etf && D.etf.rows && D.etf.rows.length)
-  $('asof6').textContent='成交 as-of '+D.date+'，份额 as-of '+(D.etf.rows[0].shr_asof||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1-$2-$3')+'（T+1）';
+  $('asof6').textContent=D.etf_share_pending
+    ? '成交 as-of '+D.date+'，份额分项见表（TuShare份额待更新）'
+    : '成交 as-of '+D.date+'，份额 as-of '+(D.etf.rows[0].shr_asof||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1-$2-$3')+'（T+1）';
 else $('s6').style.display='none';
 if (D.macro && D.macro.dr007 && D.macro.dr007.v && D.macro.dr007.v.length) {
   const drAsOf = D.macro.dr007.dates_full&&D.macro.dr007.dates_full.slice(-1)[0]||'';
@@ -188,10 +190,11 @@ lhbTable('lhb_sell', D.lhb.sell, false);
 
 /* ⑥ ETF（缺失时跳过） */
 if (D.etf && D.etf.rows && D.etf.rows.length) (function(){
+  const dateText = d => (d||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1-$2-$3')||'—';
   const rows = D.etf.rows.map(r=>`<tr><td>${r.name}<span style="color:var(--sub);font-size:11.5px"> ${r.code}</span></td>
-    <td>${fmt(r.amt_today)}</td><td>${fmt(r.shr_latest)}</td>
+    <td>${fmt(r.amt_today)}</td><td>${fmt(r.shr_latest)}</td><td>${dateText(r.shr_asof)}</td>
     <td class="${cls(r.shr_wow)}">${sign(r.shr_wow)}</td><td class="${cls(r.shr_mom)}">${sign(r.shr_mom)}</td></tr>`).join('');
-  $('etf_table').innerHTML = `<tr><th>ETF</th><th>当日成交(亿)</th><th>最新份额(亿份)</th><th>周变动</th><th>月变动</th></tr>${rows}`;
+  $('etf_table').innerHTML = `<tr><th>ETF</th><th>当日成交(亿)</th><th>最新份额(亿份)</th><th>份额日期</th><th>周变动</th><th>月变动</th></tr>${rows}`;
   const codes = Object.keys(D.etf.shr_series);
   const colors = ['#33507e','#b8860b','#d43a3a','#0d9e6e','#5a4a8a'];
   mk('c_etf', {
