@@ -44,7 +44,6 @@ if (D.macro && D.macro.dr007 && D.macro.dr007.v && D.macro.dr007.v.length) {
   $('asof7').textContent=`DR007 ${drAsOf}；10Y ${y10AsOf}；OMO ${omoAsOf}`;
 }
 else $('s7').style.display='none';
-if (!(D.flow && D.flow.l1_in && D.flow.l1_in.length)) $('s4').style.display='none';
 if (!(D.lhb && D.lhb.buy)) $('s5').style.display='none';
 if (!D.nh_detail) $('nh_grid').style.display='none';
 
@@ -142,9 +141,9 @@ mk('c_margin', {
   dataZoom:[{type:'inside'},{type:'slider',height:16,bottom:8}]
 });
 
-/* ④ 资金流（缺失时跳过） */
-if (D.flow && D.flow.l1_in && D.flow.l1_in.length) (function(){
-  const F = D.flow;
+/* ④ 资金流（缺失时显示明确空状态） */
+(function(){
+  const F = D.flow || {l1_in:[],l1_out:[],l2_in:[],l2_out:[]};
   const block = (title, arr, isIn)=>{
     if (!arr || !arr.length) {
       const src = D.flow_src === 'eastmoney' ? '东方财富公开接口' : '当前数据源';
