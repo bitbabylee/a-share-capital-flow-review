@@ -97,7 +97,7 @@ mk('c_nhnl', {
 /* ②b 历史新高个股 */
 (function(){
   const NH = D.nh_detail || {count:0, rows:[]};
-  $('nh_title').innerHTML = `历史新高个股<span class="u">当日 ${NH.count} 家 · 按申万二级行业分组</span>`;
+  $('nh_title').innerHTML = `历史新高个股<span class="u">截至 ${NH.date}，${NH.count} 家 · 按申万二级行业分组</span>`;
   const byInd = {};
   NH.rows.forEach(x=>{ const k = x.ind2||'—'; (byInd[k]=byInd[k]||[]).push(x); });
   $('nh_list').innerHTML = Object.entries(byInd).sort((a,b)=>b[1].length-a[1].length).map(([ind,arr])=>
@@ -125,7 +125,7 @@ mk('c_nhnl', {
     return `<tr><td style="white-space:nowrap;font-weight:700">${k}连板</td><td><div class="ladder-td">${items}</div></td></tr>`;
   }).join('');
   $('ladder_table').innerHTML = `<tr><th style="width:90px">梯队</th><th>个股（题材）</th></tr>${rows}`;
-  $('ladder_extra').textContent = `来源：${L.source}。「N天M板」非严格连板个股见当日导读，不列入天梯表。`;
+  $('ladder_extra').textContent = `来源：${L.source}。是否列入天梯以最近连续封板天数为准，不单凭“N天M板”标签判断。`;
 })();
 
 /* ③ 两融（缺失时跳过） */
@@ -208,13 +208,18 @@ if (D.etf && D.etf.rows && D.etf.rows.length) (function(){
 
 /* ⑦ 宏观（缺失时跳过） */
 if (D.macro && D.macro.dr007 && D.macro.dr007.v && D.macro.dr007.v.length){
+const rateDates = [...new Set([...D.macro.dr007.dates_full, ...D.macro.y10.dates_full])].sort();
+const alignRate = s => {
+  const byDate = new Map(s.dates_full.map((date,i)=>[date,s.v[i]]));
+  return rateDates.map(date=>byDate.get(date) ?? null);
+};
 mk('c_rates', {
   tooltip: tipAxis, legend: {...legendTop,data:['DR007','10Y国债']}, grid: baseGrid,
-  xAxis: {type:'category', data: D.macro.dr007.dates},
+  xAxis: {type:'category', data: rateDates.map(date=>date.slice(5).replace('-','/'))},
   yAxis: {type:'value',name:'%',scale:true},
   series: [
-    {name:'DR007',type:'line',data:D.macro.dr007.v,lineStyle:{color:BLUE,width:1.8},itemStyle:{color:BLUE},symbol:'none',smooth:true},
-    {name:'10Y国债',type:'line',data:D.macro.y10.v,lineStyle:{color:GOLD,width:1.6},itemStyle:{color:GOLD},symbol:'none',smooth:true}
+    {name:'DR007',type:'line',data:alignRate(D.macro.dr007),lineStyle:{color:BLUE,width:1.8},itemStyle:{color:BLUE},symbol:'none',smooth:true},
+    {name:'10Y国债',type:'line',data:alignRate(D.macro.y10),lineStyle:{color:GOLD,width:1.6},itemStyle:{color:GOLD},symbol:'none',smooth:true}
   ],
   dataZoom:[{type:'inside'},{type:'slider',height:16,bottom:8}]
 });
