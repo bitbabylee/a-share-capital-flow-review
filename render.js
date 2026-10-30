@@ -223,14 +223,22 @@ mk('c_rates', {
   ],
   dataZoom:[{type:'inside'},{type:'slider',height:16,bottom:8}]
 });
+const omoDates = [...new Set([
+  ...D.macro.omo.dates_full,
+  ...D.turnover.dates_full.filter(date=>date>=D.macro.omo.dates_full[0] && date<=D.macro.omo.dates_full.slice(-1)[0])
+])].sort();
+const omoByDate = new Map(D.macro.omo.dates_full.map((date,i)=>[date,{
+  inject:D.macro.omo.inject[i], mature:D.macro.omo.mature[i]
+}]));
+const omoPoints = omoDates.map(date=>omoByDate.get(date) ?? {inject:null,mature:null});
 mk('c_omo', {
   tooltip: tipAxis, legend: {...legendTop,data:['投放','到期','净投放(右)']}, grid: baseGrid,
-  xAxis: {type:'category', data: D.macro.omo.dates},
+  xAxis: {type:'category', data: omoDates.map(date=>date.slice(5).replace('-','/'))},
   yAxis: [{type:'value',name:'亿元'},{type:'value',name:'亿元',splitLine:{show:false}}],
   series: [
-    {name:'投放',type:'bar',data:D.macro.omo.inject,itemStyle:{color:UP},barMaxWidth:9},
-    {name:'到期',type:'bar',data:D.macro.omo.mature.map(v=>-v),itemStyle:{color:DOWN},barMaxWidth:9},
-    {name:'净投放(右)',type:'line',yAxisIndex:1,data:D.macro.omo.inject.map((v,i)=>Math.round(v-D.macro.omo.mature[i])),
+    {name:'投放',type:'bar',data:omoPoints.map(p=>p.inject),itemStyle:{color:UP},barMaxWidth:9},
+    {name:'到期',type:'bar',data:omoPoints.map(p=>p.mature==null?null:-p.mature),itemStyle:{color:DOWN},barMaxWidth:9},
+    {name:'净投放(右)',type:'line',yAxisIndex:1,data:omoPoints.map(p=>p.inject==null||p.mature==null?null:Math.round(p.inject-p.mature)),
      lineStyle:{color:GOLD,width:1.6},itemStyle:{color:GOLD},symbol:'none',smooth:true}
   ],
   dataZoom:[{type:'inside'},{type:'slider',height:16,bottom:8}]
