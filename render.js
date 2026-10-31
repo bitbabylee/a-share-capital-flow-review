@@ -144,10 +144,13 @@ mk('c_margin', {
 /* ④ 资金流（缺失时显示明确空状态） */
 (function(){
   const F = D.flow || {l1_in:[],l1_out:[],l2_in:[],l2_out:[]};
+  const level1 = D.flow_classification === 'eastmoney_industry' ? '东财行业' : '申万一级';
   const block = (title, arr, isIn)=>{
     if (!arr || !arr.length) {
       const src = D.flow_src === 'eastmoney' ? '东方财富公开接口' : '当前数据源';
-      return `<div class="card"><h3>${title}</h3><div class="empty-state">${src}未返回该榜单<br>已保留空值，未使用推算数据</div></div>`;
+      const reason = D.flow_classification === 'eastmoney_industry' && title.startsWith('申万二级')
+        ? '当前东财行业源不提供申万二级榜单' : src+'未返回该榜单';
+      return `<div class="card"><h3>${title}</h3><div class="empty-state">${reason}<br>已保留空值，未使用推算数据</div></div>`;
     }
     const mx = Math.max(...arr.map(x=>Math.abs(x.v)));
     const items = arr.map(x=>`
@@ -156,7 +159,7 @@ mk('c_margin', {
     return `<div class="card"><h3>${title}</h3>${items}</div>`;
   };
   $('flow_grid').innerHTML =
-    block('申万一级 · 净流入 TOP5', F.l1_in, true) + block('申万一级 · 净流出 TOP5', F.l1_out, false) +
+    block(level1+' · 净流入 TOP5', F.l1_in, true) + block(level1+' · 净流出 TOP5', F.l1_out, false) +
     block('申万二级 · 净流入 TOP5', F.l2_in, true) + block('申万二级 · 净流出 TOP5', F.l2_out, false);
 })();
 
