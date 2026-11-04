@@ -34,7 +34,7 @@ if (D.margin && D.margin.dates_full && D.margin.dates_full.length)
 else $('s3').style.display='none';
 if (D.etf && D.etf.rows && D.etf.rows.length)
   $('asof6').textContent=D.etf_share_pending
-    ? '成交 as-of '+D.date+'，份额分项见表（TuShare份额待更新）'
+    ? '成交 as-of '+(D.etf_trade_asof||D.date)+'，份额 as-of '+(D.etf.rows[0].shr_asof||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1-$2-$3')+'（TuShare份额待更新）'
     : '成交 as-of '+D.date+'，份额 as-of '+(D.etf.rows[0].shr_asof||'').replace(/(\d{4})(\d{2})(\d{2})/,'$1-$2-$3')+'（T+1）';
 else $('s6').style.display='none';
 if (D.macro && D.macro.dr007 && D.macro.dr007.v && D.macro.dr007.v.length) {
