@@ -23,7 +23,7 @@ $('foot').textContent = D.text.foot;
 ['1','2','3','4','5','6','7','8'].forEach(i=>$('note'+i).textContent=D.text.notes['s'+i]||'');
 
 /* as-of 标签 */
-$('asof1').textContent='as-of '+D.date;
+$('asof1').textContent=D.indices_asof_text||('as-of '+D.date);
 $('asof2').textContent='涨跌停 as-of '+(D.breadth&&D.breadth.asof||D.date)+'；新高/新低 as-of '+(D.breadth&&D.breadth.new_high_asof||D.date);
 $('asof4').textContent='as-of '+(D.flow_asof||D.date);
 $('asof5').textContent='as-of '+(D.lhb_asof||D.date);
@@ -148,8 +148,8 @@ mk('c_margin', {
   const block = (title, arr, isIn)=>{
     if (!arr || !arr.length) {
       const src = D.flow_src === 'eastmoney' ? '东方财富公开接口' : '当前数据源';
-      const reason = D.flow_classification === 'eastmoney_industry' && title.startsWith('申万二级')
-        ? '当前东财行业源不提供申万二级榜单' : src+'未返回该榜单';
+      const reason = D.flow_empty_reason || (D.flow_classification === 'eastmoney_industry' && title.startsWith('申万二级')
+        ? '当前东财行业源不提供申万二级榜单' : src+'未返回该榜单');
       return `<div class="card"><h3>${title}</h3><div class="empty-state">${reason}<br>已保留空值，未使用推算数据</div></div>`;
     }
     const mx = Math.max(...arr.map(x=>Math.abs(x.v)));
